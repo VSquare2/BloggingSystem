@@ -6,7 +6,7 @@ import com.project.blogsystem.payload.UserDTO;
 
 public interface UserServiceInterface {
 
-	
+	UserDTO registerNewUser(UserDTO user);
 	UserDTO createUser(UserDTO userDTO);
 	UserDTO updateUser(UserDTO userDTO, Integer userId);
 	void deleteUser(Integer userId);

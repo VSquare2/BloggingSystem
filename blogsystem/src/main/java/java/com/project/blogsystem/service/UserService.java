@@ -8,9 +8,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.project.blogsystem.config.AppConstants;
+import com.project.blogsystem.entity.Role;
 import com.project.blogsystem.entity.User;
 import com.project.blogsystem.exception.ResourceNotFoundException;
 import com.project.blogsystem.payload.UserDTO;
+import com.project.blogsystem.repository.RoleRepository;
 import com.project.blogsystem.repository.UserRepository;
 
 
@@ -23,13 +26,16 @@ public class UserService implements UserServiceInterface{
 	
 	@Autowired
 	private ModelMapper modelMapper; 
+	
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Override
 	public UserDTO createUser(UserDTO userDTO) {
 		// TODO Auto-generated method stub
 		User user = dtoToUser(userDTO);
-		userRepository.save(user);
-		return userToDTO(user);
+		User createdUser=userRepository.save(user);
+		return userToDTO(createdUser);
 	}
 
 	@Override
@@ -52,8 +58,8 @@ public class UserService implements UserServiceInterface{
 		// TODO Auto-generated method stub
 		
 		Optional<User> usero = userRepository.findById(userId);
-		userRepository.deleteById(userId);
 		User user= usero.orElseThrow(()-> new ResourceNotFoundException("User", "userId", userId));
+		userRepository.deleteById(userId);
 		
 	}
 
@@ -75,6 +81,24 @@ public class UserService implements UserServiceInterface{
 		List<UserDTO> userDTOs = users.stream().map(user-> userToDTO(user)).collect(Collectors.toList());
 		
 		return userDTOs;
+	}
+	
+	@Override
+	public UserDTO registerNewUser(UserDTO userDto) {
+
+		User user = this.modelMapper.map(userDto, User.class);
+
+		// encoded the password
+		user.setPassword(user.getPassword());
+
+		// roles
+		Role role = this.roleRepository.findById(AppConstants.NORMAL_USER).get();
+
+		user.getRoles().add(role);
+
+		User newUser = this.userRepository.save(user);
+
+		return this.modelMapper.map(newUser, UserDTO.class);
 	}
 	
 	private User dtoToUser(UserDTO userDTO) {

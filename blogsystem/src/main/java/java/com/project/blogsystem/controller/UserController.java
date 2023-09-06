@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.project.blogsystem.payload.UserDTO;
 import com.project.blogsystem.service.UserService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/api/users")
@@ -36,27 +38,20 @@ public class UserController {
 	
 	@PutMapping("/{userId}")
 	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO,@PathVariable("userId") Integer userId){
-	
-		;
-		
-		try {
+
 			UserDTO updateUserDTO = userService.updateUser(userDTO, userId);
 			return new ResponseEntity<UserDTO>(updateUserDTO,HttpStatus.OK);
-	        }  catch (Exception e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	        }
-				
+	        
 	}
 	
+	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{userId}")
 	public ResponseEntity<ApiResponse> deleteUser(@PathVariable("userId") Integer userId){
 		
-		 try {
 	            userService.deleteUser(userId);
 	            return new ResponseEntity<ApiResponse>(new ApiResponse("Successfully deleted",true),HttpStatus.OK);
-	        }  catch (Exception e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	        }
+	        
 				
 	}
 	
@@ -69,15 +64,17 @@ public class UserController {
 	}
 	
 	@GetMapping("/{userId}")
-	public ResponseEntity<UserDTO> getUserById(@PathVariable("userId") Integer userId){
+	public ResponseEntity<UserDTO> getUserById(@NotBlank @Valid
+			@PathVariable("userId") Integer userId){
 	
-		 try {
+		// try {
 			 UserDTO getUserDTO = userService.getUserById(userId);
-				
-				return new ResponseEntity<UserDTO>(getUserDTO,HttpStatus.OK);
-	        }  catch (Exception e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	        }
+			 return new ResponseEntity<UserDTO>(getUserDTO,HttpStatus.OK);
+//	        }  catch (Exception e) {
+//	        	
+//	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//	        	
+//	        }
 				
 	}
 	
